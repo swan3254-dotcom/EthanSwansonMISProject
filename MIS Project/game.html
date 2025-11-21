@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ethan Swanson - Snake Game</title>
+    <link rel="stylesheet" href="CSS/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Interactive Web Development Project</h1>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="career.html">Career</a>
+            <a href="discover.html">Discover</a>
+            <a href="game.html">Game Development</a>
+            <a href="hobbies.html">Hobbies</a>
+            <a href="resume.html">Resume</a>
+        </nav>
+    </header>
+    <main>
+        <section id="project-intro">
+            <h2>Enhanced Snake Game</h2>
+            <p>This is a challenging version of the classic Snake game! The board is 10x10 squares. The snake wraps around the edges instead of dying on walls. Eat multiple foods (up to 3 on screen at once) to grow. Win by reaching 200 points (eat 20 foods). Speed starts slow but increases every 50 points. High scores are saved locally. Use arrow keys to control the snake.</p>
+        </section>
+        <section id="game-section">
+            <h3>Snake Game Play</h3>
+            <p>Control the green snake head with arrow keys. Eat the red foods to score 10 points each and grow. Avoid hitting any part of your own body. The game wraps around the board edges, so no wall deaths! Game speeds up every 50 points for increased challenge. Achieve 200 points to win! Restart any time with the button below.</p>
+            <div id="game-container" style="display: flex; flex-direction: column; align-items: center;">
+                <canvas id="gameCanvas" width="400" height="400" style="border: 1px solid #333; margin: 20px;"></canvas>
+                <div style="display: flex; justify-content: space-around; width: 100%; margin-top: 1em;">
+                    <p id="score" style="font-size: 1.2em;">Score: 0</p>
+                    <p id="high-score" style="font-size: 1.2em;">High Score: 0</p>
+                </div>
+                <div style="margin-top: 0.5em;">
+                    <button id="restart-btn">Restart Game</button>
+                    <button id="fullscreen-btn" style="margin-left: 1em;">Full Screen</button>
+                </div>
+            </div>
+        </section>
+        <script src="JS/game.js"></script>
+    </main>
+    <footer>
+        &copy; 2025 Ethan Swanson
+    </footer>
+</body>
+</html>
