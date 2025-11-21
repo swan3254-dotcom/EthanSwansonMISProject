@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ethan Swanson - Web Development Project</title>
+    <link rel="stylesheet" href="CSS/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Interactive Web Development Project</h1>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="career.html">Career</a>
+            <a href="discover.html">Discover</a>
+            <a href="game.html">Game Development</a>
+            <a href="hobbies.html">Hobbies</a>
+            <a href="resume.html">Resume</a>
+        </nav>
+    </header>
+    <main>
+        <section id="project-intro">
+            <h2>Interactive Web Development Project</h2>
+            <p>This interactive maze game demonstrates proficiency in web development technologies including HTML5 Canvas, JavaScript algorithms, and responsive design. It features procedural maze generation using a recursive backtracking algorithm and keyboard controls for an engaging user experience.</p>
+        </section>
+        <section id="game-section">
+            <h3>Maze Game Demo</h3>
+            <p>Use arrow keys to navigate through the maze. Find your way to the green square to win!</p>
+            <div id="game-container" style="display: flex; flex-direction: column; align-items: center;">
+                <div>
+                    <label for="maze-size">Maze Size:</label>
+                    <input type="number" id="maze-size" value="10" min="5" max="20" style="width: 60px;">
+                    <button id="generate-maze">Generate Maze</button>
+                </div>
+                <canvas id="maze-canvas" width="500" height="500" style="border: 1px solid #000; margin-top: 1em;"></canvas>
+                <p id="timer" style="margin-top: 1em; font-size: 1.2em;">Time: 0s</p>
+            </div>
+        </section>
+        <script>
+            const canvas = document.getElementById('maze-canvas');
+            const ctx = canvas.getContext('2d');
+            const timerElement = document.getElementById('timer');
+            const mazeSizeInput = document.getElementById('maze-size');
+            const generateButton = document.getElementById('generate-maze');
+
+            let maze = [];
+            let cellSize;
+            let player = { x: 0, y: 0 };
+            let finish = { x: 0, y: 0 };
+            let timer = 0;
+            let timerInterval;
+            let gameStarted = false;
+
+            function generateMaze(size) {
+                maze = Array.from({ length: size }, () => Array(size).fill(1)); // Start with all walls
+                const stack = [{ x: 0, y: 0 }];
+                maze[0][0] = 0; // Start point
+
+                while (stack.length > 0) {
+                    const current = stack[stack.length - 1];
+                    const neighbors = getUnvisitedNeighbors(current.x, current.y, size);
+
+                    if (neighbors.length > 0) {
+                        const next = neighbors[Math.floor(Math.random() * neighbors.length)];
+                        maze[next.y][next.x] = 0; // Mark as path
+                        maze[(current.y + next.y) / 2][(current.x + next.x) / 2] = 0; // Remove wall between
+                        stack.push(next);
+                    } else {
+                        stack.pop();
+                    }
+                }
+
+                finish = { x: size - 1, y: size - 1 };
+                maze[finish.y][finish.x] = 0; // Ensure finish is open
+
+                // Ensure the finish is reachable by clearing a path if blocked
+                if (maze[size - 2][size - 1] === 1 && maze[size - 1][size - 2] === 1) {
+                    maze[size - 2][size - 1] = 0;
+                }
+
+                cellSize = canvas.width / size;
+                drawMaze();
+            }
+
+            function getUnvisitedNeighbors(x, y, size) {
+                const directions = [
+                    { x: 0, y: -2 }, // Up
+                    { x: 2, y: 0 },  // Right
+                    { x: 0, y: 2 },  // Down
+                    { x: -2, y: 0 }  // Left
+                ];
+                const neighbors = [];
+
+                for (const dir of directions) {
+                    const nx = x + dir.x;
+                    const ny = y + dir.y;
+                    if (
+                        nx >= 0 &&
+                        ny >= 0 &&
+                        nx < size &&
+                        ny < size &&
+                        maze[ny][nx] === 1
+                    ) {
+                        neighbors.push({ x: nx, y: ny });
+                    }
+                }
+
+                return neighbors;
+            }
+
+            function drawMaze() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                for (let y = 0; y < maze.length; y++) {
+                    for (let x = 0; x < maze[y].length; x++) {
+                        ctx.fillStyle = maze[y][x] === 1 ? '#000' : '#fff';
+                        ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+                    }
+                }
+                drawFinish();
+                drawPlayer();
+            }
+
+            function drawPlayer() {
+                ctx.fillStyle = 'red';
+                ctx.beginPath();
+                ctx.arc(
+                    player.x * cellSize + cellSize / 2,
+                    player.y * cellSize + cellSize / 2,
+                    cellSize / 3,
+                    0,
+                    Math.PI * 2
+                );
+                ctx.fill();
+            }
+
+            function drawFinish() {
+                ctx.fillStyle = 'green';
+                ctx.fillRect(
+                    finish.x * cellSize + cellSize * 0.1,
+                    finish.y * cellSize + cellSize * 0.1,
+                    cellSize * 0.8,
+                    cellSize * 0.8
+                );
+            }
+
+            function movePlayer(dx, dy) {
+                const newX = player.x + dx;
+                const newY = player.y + dy;
+                if (
+                    newX >= 0 &&
+                    newY >= 0 &&
+                    newX < maze.length &&
+                    newY < maze.length &&
+                    maze[newY][newX] === 0
+                ) {
+                    player.x = newX;
+                    player.y = newY;
+                    drawMaze();
+
+                    if (!gameStarted) {
+                        startTimer();
+                        gameStarted = true;
+                    }
+
+                    if (player.x === finish.x && player.y === finish.y) {
+                        clearInterval(timerInterval);
+                        alert(`You won! Time: ${timer}s`);
+                    }
+                }
+            }
+
+            function startTimer() {
+                timer = 0;
+                timerInterval = setInterval(() => {
+                    timer++;
+                    timerElement.textContent = `Time: ${timer}s`;
+                }, 1000);
+            }
+
+            document.addEventListener('keydown', (e) => {
+                e.preventDefault(); // Prevent arrow keys from scrolling the page
+                switch (e.key) {
+                    case 'ArrowUp':
+                        movePlayer(0, -1);
+                        break;
+                    case 'ArrowDown':
+                        movePlayer(0, 1);
+                        break;
+                    case 'ArrowLeft':
+                        movePlayer(-1, 0);
+                        break;
+                    case 'ArrowRight':
+                        movePlayer(1, 0);
+                        break;
+                }
+            });
+
+            generateButton.addEventListener('click', () => {
+                player = { x: 0, y: 0 };
+                gameStarted = false;
+                clearInterval(timerInterval);
+                timerElement.textContent = 'Time: 0s';
+                generateMaze(parseInt(mazeSizeInput.value));
+            });
+
+            generateMaze(parseInt(mazeSizeInput.value));
+        </script>
+    </main>
+    <footer>
+        &copy; 2025 Ethan Swanson
+    </footer>
+</body>
+</html>
